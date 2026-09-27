@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-
 print("=" * 60)
 print("REAL VS SYNTHETIC MEDICAL DATA COMPARISON")
 print("=" * 60)
