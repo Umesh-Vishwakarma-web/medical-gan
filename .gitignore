@@ -1,0 +1,30 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Original dataset
+medical_data.csv
+
+# Generated data files
+synthetic_medical_data.csv
+synthetic_medical_data_cleaned.csv
+cleaned_medical_data.csv
+
+# Processed data
+processed_medical_data.npy
+processed_feature_names.csv
+
+# IDE files
+.vscode/
+
+# Python distribution files
+*.egg-info/
+
+# Operating system files
+.DS_Store
+Thumbs.db
