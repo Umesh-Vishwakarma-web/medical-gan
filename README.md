@@ -1,142 +1,83 @@
-Building Synthetic Medical Records Using GANs
+Synthetic Medical Records with CTGAN
 
-This project is about generating synthetic medical records using CTGAN (Conditional Tabular GAN).
+An end-to-end Python pipeline that cleans a tabular medical dataset, trains a CTGAN (Conditional Tabular GAN) model, generates synthetic patient records, and measures how closely the synthetic data matches the original.
 
-I built this project to understand how generative AI can be used with tabular healthcare data. The project takes a medical dataset, cleans and prepares it, trains a CTGAN model, generates synthetic records, and then compares the generated data with the original data.
+Note: This is a learning and portfolio project, not a production healthcare system. The synthetic data has not been tested for privacy or memorization. See Limitations.
 
-This is a learning and portfolio project, not a production healthcare system.
-
-Project Overview
-
-The main goal of this project is to explore how synthetic medical data can be generated while maintaining similar statistical patterns to the original dataset.
-
-The project includes:
-
-Data cleaning
-Removal of direct personal identifiers
-Feature engineering
-Missing-value handling
-Categorical data processing
-Numerical data scaling
-CTGAN model training
-Synthetic data generation
-Data validation
-Real vs synthetic data comparison
-Statistical evaluation
-Data visualization
-Project Workflow
-Medical Dataset
-      |
-      v
-Data Cleaning
-      |
-      v
-Remove Personal Identifiers
-      |
-      v
-Feature Engineering
-      |
-      v
-Encoding + Scaling
-      |
-      v
-CTGAN Training
-      |
-      v
-Synthetic Medical Records
-      |
-      v
-Validation and Cleaning
-      |
-      v
-Real vs Synthetic Comparison
-      |
-      v
-Evaluation Results
+Table of Contents
+At a Glance
+Pipeline
+Dataset
+Preprocessing
+Model
+Validation of Synthetic Data
+Results
+Project Structure
+How to Run
+Tech Stack
+What I Learned
+Limitations
+Future Improvements
+Author
+At a Glance
+Item	Value
+Real records used	17,498
+Synthetic records generated	17,498
+Model	CTGAN, 300 epochs, batch size 500
+Invalid records fixed in raw data	4,382 negative hospital stays
+Missing values after cleaning	0
+Features after encoding	29
+Evaluation	Numerical statistics + categorical distribution comparison + 8 charts
+Pipeline
+Medical dataset
+Clean data and removepersonal identifiers
+Feature engineering:length_of_stay
+Encode categorical + scalenumerical
+Train CTGAN
+Generate synthetic records
+Validate and clean syntheticdata
+Compare real vs synthetic
+Evaluation tables and charts
 Dataset
 
-The original dataset contains 17,498 records and 14 columns.
+The original dataset had 17,498 records and 14 columns:
 
-The original dataset included fields such as:
+Patient ID, First name, Last name, Age, Gender, Phone, Email, Department, Diagnosis, Treatment, Admission date, Discharge date, Status, Bill amount
 
-Patient ID
-First name
-Last name
-Age
-Gender
-Phone
-Email
-Department
-Diagnosis
-Treatment
-Admission date
-Discharge date
-Status
-Bill amount
+Direct identifiers (Patient ID, first name, last name, phone, email) were removed before training. After cleaning, the modelling dataset has 8 columns: age, gender, department, diagnosis, treatment, status, bill amount, and length of stay.
 
-For model training, direct identifiers were removed, including:
+The dataset is not included in this repository. Only use data you have permission to use, and never upload real patient information to GitHub.
 
-Patient ID
-First name
-Last name
-Phone number
-Email address
+Preprocessing
 
-The original dataset is not included in this GitHub repository.
+preprocessing.py prepares the data for training:
 
-Important: The dataset used for this project should only be used when you have permission to use it.
-Do not upload real patient information or other sensitive personal data to GitHub.
+Load the dataset
+Remove direct personal identifiers
+Convert admission and discharge dates
+Create a length_of_stay feature
+Detect invalid negative hospital stays (4,382 found) and handle them
+Handle missing numerical and categorical values
+Encode categorical variables and scale numerical variables
+Save the processed data
+After preprocessing	
+Records	17,498
+Cleaned columns	8
+Model features after encoding	29
+Missing values	0
+Negative hospital stays	0
+Model
 
-Data Preprocessing
+CTGAN is designed for tabular data that mixes numerical and categorical columns, which is why it was chosen over a standard image-style GAN. This project uses the CTGAN library rather than a hand-written GAN architecture.
 
-Before training CTGAN, the dataset is cleaned and prepared.
+Setting	Value
+Model	CTGAN
+Epochs	300
+Batch size	500
+Records generated	17,498
+Validation of Synthetic Data
 
-The preprocessing steps include:
-
-Loading the medical dataset
-Removing direct personal identifiers
-Converting admission and discharge dates
-Creating a length_of_stay feature
-Detecting invalid negative hospital stays
-Handling missing numerical values
-Handling missing categorical values
-Encoding categorical variables
-Scaling numerical variables
-Saving the processed data
-
-The original dataset contained 4,382 invalid negative hospital stay values.
- These values were identified and handled during preprocessing.
-
-After preprocessing:
-
-Records: 17,498
-Cleaned columns: 8
-Model features after encoding: 29
-Missing values after cleaning: 0
-Negative hospital stays after cleaning: 0
-CTGAN Model
-
-I used CTGAN (Conditional Tabular GAN) to generate synthetic medical records.
-
-CTGAN is designed for tabular datasets containing both numerical and categorical variables.
-
-The model was trained using:
-
-Model: CTGAN
-Epochs: 300
-Batch Size: 500
-
-After training, the model generated:
-
-17,498 synthetic medical records
-
-The generated records were then validated and cleaned before performing the final comparison.
-
-Synthetic Data Validation
-
-The generated data was checked for common data-quality problems.
-
-The validation process checks:
+GAN output can contain values that are impossible in real data, so the generated records go through a separate validation step (validate_and_clean_synthetic.py) that checks:
 
 Missing values
 Invalid ages
@@ -144,227 +85,98 @@ Negative hospital stays
 Numerical formatting
 Categorical values
 
-Some invalid values were found in the generated dataset and were corrected during the validation step.
-
-The cleaned synthetic dataset is saved as:
-
-synthetic_medical_data_cleaned.csv
-
-Generated datasets are excluded from this repository using .gitignore.
+Some invalid values were found in the generated data and corrected. The cleaned output is saved as synthetic_medical_data_cleaned.csv.
 
 Results
+Numerical comparison
+Feature	Real mean	Synthetic mean	Difference
+Age	45.43	42.60	about -6.2%
+Bill amount	100,716.90	110,896.95	about +10.1%
+Length of stay	280.36	263.15	about -6.1%
 
-The real and synthetic datasets were compared using numerical statistics and categorical distributions.
+Median and standard deviation are included in results/numerical_comparison.csv.
 
-Numerical Comparison
-Feature	Real Mean	Synthetic Mean
-Age	45.43	42.60
-Bill Amount	100716.90	110896.95
-Length of Stay	280.36	263.15
+The synthetic means are close to the real ones but not exact. Bill amount shows the largest gap, with the synthetic data running about 10% higher on average.
 
-The comparison also includes median and standard deviation values.
+Categorical comparison
 
-The complete numerical comparison is available in:
+Distribution difference between real and synthetic data, per feature:
 
-results/numerical_comparison.csv
-Categorical Evaluation
-
-The categorical distributions were compared between the real and synthetic datasets.
-
-The average distribution difference was approximately:
-
-8.32%
-
-Feature	Distribution Difference
+Feature	Distribution difference
 Gender	7.92%
 Department	4.67%
 Diagnosis	4.64%
 Treatment	8.38%
 Status	8.32%
 
-These values provide a basic measure of how closely the synthetic categorical distributions match the original dataset.
+This is a simple custom measure of how closely the category proportions match, not a standard published benchmark. Full details are in results/categorical_evaluation.csv.
 
-The complete evaluation is available in:
-
-results/categorical_evaluation.csv
-Visual Comparisons
-
-The project generates comparison charts for the real and synthetic datasets.
-
-The charts include:
-
-Age
-Bill Amount
-Length of Stay
-Gender
-Department
-Diagnosis
-Treatment
-Status
-
-The charts are stored in:
-
-results/
+Charts
+<table> <tr> <td><img src="results/age_comparison.png" alt="Age comparison" width="100%"></td> <td><img src="results/bill_amount_comparison.png" alt="Bill amount comparison" width="100%"></td> </tr> <tr> <td><img src="results/length_of_stay_comparison.png" alt="Length of stay comparison" width="100%"></td> <td><img src="results/gender_comparison.png" alt="Gender comparison" width="100%"></td> </tr> <tr> <td><img src="results/department_comparison.png" alt="Department comparison" width="100%"></td> <td><img src="results/diagnosis_comparison.png" alt="Diagnosis comparison" width="100%"></td> </tr> <tr> <td><img src="results/treatment_comparison.png" alt="Treatment comparison" width="100%"></td> <td><img src="results/status_comparison.png" alt="Status comparison" width="100%"></td> </tr> </table>
 Project Structure
+text
 medical-gan/
-│
-├── preprocessing.py
-├── train_gan.py
-├── evaluate_synthetic.py
-├── validate_and_clean_synthetic.py
-├── compare_data.py
-├── evaluate_categories.py
-│
-├── results/
-│   ├── age_comparison.png
-│   ├── bill_amount_comparison.png
-│   ├── length_of_stay_comparison.png
-│   ├── gender_comparison.png
-│   ├── department_comparison.png
-│   ├── diagnosis_comparison.png
-│   ├── treatment_comparison.png
-│   ├── status_comparison.png
-│   ├── numerical_comparison.csv
-│   └── categorical_evaluation.csv
-│
-├── README.md
+├── preprocessing.py                 # Clean data, remove identifiers, engineer features, encode and scale
+├── train_gan.py                     # Train CTGAN and generate synthetic records
+├── evaluate_synthetic.py            # Initial evaluation of generated data
+├── validate_and_clean_synthetic.py  # Detect and fix invalid synthetic values
+├── compare_data.py                  # Numerical comparison and charts
+├── evaluate_categories.py           # Categorical distribution comparison
+├── results/                         # Charts and evaluation CSV files
 ├── requirements.txt
-└── .gitignore
+├── .gitignore
+└── README.md
 How to Run
-1. Clone the Repository
+1. Clone and install
+bash
 git clone https://github.com/Umesh-Vishwakarma-web/medical-gan.git
-
-Move into the project folder:
-
 cd medical-gan
-2. Install Required Libraries
 pip install -r requirements.txt
-3. Add the Dataset
+2. Add your dataset
 
-Place your authorized dataset inside the project folder with the filename:
+Place an authorized dataset in the project folder as medical_data.csv. It is intentionally not included in this repository.
 
-medical_data.csv
-
-The file should be located like this:
-
-medical-gan/
-│
-├── medical_data.csv
-├── preprocessing.py
-├── train_gan.py
-└── ...
-
-The dataset is intentionally not included in this repository.
-
-4. Run Preprocessing
-python preprocessing.py
-
-This creates:
-
-cleaned_medical_data.csv
-processed_medical_data.npy
-processed_feature_names.csv
-5. Train CTGAN
-python train_gan.py
-
-This generates:
-
-synthetic_medical_data.csv
-6. Evaluate the Generated Data
+3. Run the pipeline
+bash
+python preprocessing.py              # creates cleaned_medical_data.csv, processed_medical_data.npy, processed_feature_names.csv
+python train_gan.py                  # creates synthetic_medical_data.csv
 python evaluate_synthetic.py
-7. Validate and Clean Synthetic Data
-python validate_and_clean_synthetic.py
+python validate_and_clean_synthetic.py   # creates synthetic_medical_data_cleaned.csv
+python compare_data.py               # creates charts and results/numerical_comparison.csv
+python evaluate_categories.py        # creates results/categorical_evaluation.csv
 
-This creates:
+Generated datasets are excluded from the repository through .gitignore.
 
-synthetic_medical_data_cleaned.csv
-8. Compare Real and Synthetic Data
-python compare_data.py
+Tech Stack
 
-This generates the comparison charts and:
+Python, Pandas, NumPy, Scikit-learn, CTGAN, Matplotlib, Git and GitHub
 
-results/numerical_comparison.csv
-9. Evaluate Categorical Distributions
-python evaluate_categories.py
-
-This creates:
-
-results/categorical_evaluation.csv
-Complete Command Sequence
-
-If everything is already installed and the dataset is present, the complete workflow is:
-
-python preprocessing.py
-python train_gan.py
-python evaluate_synthetic.py
-python validate_and_clean_synthetic.py
-python compare_data.py
-python evaluate_categories.py
-Technologies Used
-Python
-Pandas
-NumPy
-Scikit-learn
-CTGAN
-Matplotlib
-Git
-GitHub
 What I Learned
-
-Through this project, I learned about:
-
-Data cleaning and preprocessing
-Handling numerical and categorical data
-Feature engineering
-Missing-value handling
-GANs
-CTGAN for tabular data
-Synthetic data generation
-Data validation
-Statistical comparison
-Data visualization
-Git and GitHub
-Building an end-to-end machine-learning project
+Real data is messy. The raw dataset contained 4,382 negative hospital stays, which would have taught the model impossible patterns if left in.
+Generated data needs its own checks. The GAN produced invalid values of its own, so a separate validation step was necessary before any comparison.
+"Looks similar" needs numbers. Comparing means, medians, standard deviations, and category proportions gave a concrete view of where the synthetic data matched the original and where it did not.
+Privacy is a separate problem from realism. Statistical similarity says nothing about whether the model memorized real patients, which this project does not test.
 Limitations
+Built for learning and portfolio purposes only.
+The synthetic data should not be treated as private, anonymous, or suitable for real healthcare use.
+No privacy or memorization testing was performed.
+Evaluation is limited to basic statistics and category proportions. Feature correlations and downstream model performance were not tested.
+Synthetic data quality depends on the quality and size of the original dataset.
 
-This project is mainly for learning and portfolio purposes.
-
-The generated data should not automatically be considered private, anonymous, or suitable for real healthcare applications.
-
-A real healthcare system would require additional:
-
-Privacy testing
-Security controls
-Bias and fairness evaluation
-Memorization testing
-Statistical validation
-Domain-expert review
-Regulatory and legal compliance
-
-The quality of synthetic data also depends on the quality, size, and characteristics of the original training dataset.
+A real healthcare system would additionally require privacy testing, security controls, bias and fairness evaluation, domain-expert review, and regulatory compliance.
 
 Future Improvements
-
-Possible improvements for this project include:
-
-Testing other synthetic data generation models
-Adding stronger statistical evaluation methods
-Measuring correlations between features
-Testing privacy and memorization risks
-Comparing downstream machine-learning performance
-Adding fairness analysis
-Using larger datasets
-Experimenting with privacy-preserving techniques
-Adding automated evaluation reports
+Compare CTGAN with other synthetic data models
+Add correlation and stronger statistical tests
+Test for memorization and privacy leakage
+Compare downstream machine learning performance on real vs synthetic data
+Add fairness analysis
+Generate an automated evaluation report
 Author
 
 Umesh Vishwakarma
-
-GitHub:
-https://github.com/Umesh-Vishwakarma-web
+GitHub: Umesh-Vishwakarma-web
 
 Disclaimer
 
-This project is created for educational and portfolio purposes only.
-
-It is not intended for clinical use, medical diagnosis, patient treatment, or making healthcare decisions.
+This project is for educational and portfolio purposes only. It is not intended for clinical use, medical diagnosis, patient treatment, or healthcare decisions.
